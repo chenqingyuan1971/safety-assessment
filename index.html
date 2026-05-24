@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>适老化安全评估 · 居家安全AI评估</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f5f5f5;color:#333;line-height:1.6}
+header{background:#fff;padding:16px 24px;box-shadow:0 1px 3px rgba(0,0,0,.1);display:flex;align-items:center;gap:12px}
+header h1{font-size:18px;color:#1a73e8}
+header span{font-size:12px;color:#888;margin-left:auto}
+.phase-tabs{display:flex;background:#fff;border-bottom:1px solid #ddd;padding:0 16px}
+.phase-tab{padding:12px 20px;cursor:pointer;font-size:14px;border-bottom:3px solid transparent;color:#666;transition:.2s}
+.phase-tab.active{color:#1a73e8;border-color:#1a73e8;font-weight:600}
+.phase-tab:hover{color:#1a73e8}
+.phase-tab .badge{display:inline-block;margin-left:6px;font-size:11px;padding:1px 8px;border-radius:10px;color:#fff}
+.phase-tab .badge.l0{background:#d32f2f}
+.phase-tab .badge.l1{background:#f57c00}
+.phase-tab .badge.l2{background:#388e3c}
+.container{max-width:720px;margin:0 auto;padding:20px 16px}
+.question-card{background:#fff;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.q-level{font-size:11px;color:#fff;padding:2px 10px;border-radius:4px;display:inline-block;margin-bottom:8px}
+.q-level.l0{background:#d32f2f}
+.q-level.l1{background:#f57c00}
+.q-level.l2{background:#388e3c}
+.q-text{font-size:16px;font-weight:500;margin-bottom:12px;line-height:1.5}
+.q-source{font-size:11px;color:#999;margin-bottom:12px}
+.options{display:flex;flex-direction:column;gap:8px}
+.option{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1.5px solid #e0e0e0;border-radius:8px;cursor:pointer;transition:.15s}
+.option:hover{border-color:#90caf9;background:#f5f9ff}
+.option.selected{border-color:#1a73e8;background:#e8f0fe}
+.option input{margin-top:2px;accent-color:#1a73e8}
+.option-text{font-size:14px;line-height:1.4}
+.option-points{font-size:11px;color:#888;margin-top:2px}
+.nav-row{display:flex;gap:12px;margin-top:20px}
+.btn{padding:12px 28px;border:none;border-radius:8px;font-size:15px;cursor:pointer;font-weight:500;transition:.15s}
+.btn-primary{background:#1a73e8;color:#fff}
+.btn-primary:hover{background:#1557b0}
+.btn-secondary{background:#e0e0e0;color:#555}
+.btn-secondary:hover{background:#ccc}
+.btn-success{background:#388e3c;color:#fff}
+.btn-success:hover{background:#2e7d32}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.progress{height:4px;background:#e0e0e0;border-radius:2px;margin:0 0 16px}
+.progress-bar{height:100%;background:#1a73e8;border-radius:2px;transition:width .3s}
+.q-counter{text-align:center;font-size:13px;color:#888;margin-bottom:8px}
+.result-module{margin-bottom:20px}
+.result-module h3{font-size:15px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.score-bar{height:20px;background:#e0e0e0;border-radius:10px;overflow:hidden;position:relative;margin-bottom:4px}
+.score-fill{height:100%;border-radius:10px;transition:width .8s;position:relative}
+.score-label{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:11px;color:#fff;font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.3)}
+.grade-badge{font-size:28px;font-weight:700;text-align:center;padding:20px;border-radius:12px;margin-bottom:16px}
+.grade-A{background:#e8f5e9;color:#2e7d32}
+.grade-B{background:#fff8e1;color:#f57c00}
+.grade-C{background:#fce4ec;color:#c62828}
+.grade-D{background:#ffebee;color:#b71c1c}
+.grade-E{background:#f3e5f5;color:#6a1b9a}
+.risk-tag{display:inline-block;padding:4px 12px;border-radius:12px;font-size:12px;margin:3px;font-weight:500}
+.risk-high{background:#ffcdd2;color:#c62828}
+.risk-mid{background:#fff3e0;color:#e65100}
+.report-section{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.hidden{display:none}
+@media(max-width:480px){.container{padding:12px 10px}.question-card{padding:16px;margin-bottom:10px}.phase-tab{padding:10px 12px;font-size:12px}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏠 适老化安全评估</h1>
+  <span>居家安全AI评估工具</span>
+</header>
+
+<div class="phase-tabs" id="phaseTabs">
+  <div class="phase-tab active" data-phase="intro">📋 开始评估</div>
+  <div class="phase-tab" data-phase="l0"><span class="badge l0">L0</span>基本保障</div>
+  <div class="phase-tab" data-phase="l1"><span class="badge l1">L1</span>通行合规</div>
+  <div class="phase-tab" data-phase="l2"><span class="badge l2">L2</span>适老化评估</div>
+  <div class="phase-tab" data-phase="report">📊 报告</div>
+</div>
+
+<div class="container" id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// 问题数据（5+3+25 = 33 题）
+// ═══════════════════════════════════════════════════════════
+const Q = {
+  // ── L0：基本居住保障（9题） ──
+  l0: [
+    {id:"S01", level:"L0", text:"房子有没有明显的墙体裂缝、倾斜或下沉？", source:"GB 55038-2025", options:[
+      {label:"没有 / 只有细微表面裂纹", score:5},
+      {label:"有可见裂缝但不扩大", score:1},
+      {label:"有明显结构裂缝或倾斜", score:-5}
+    ]},
+    {id:"S02", level:"L0", text:"屋顶或外墙有没有漏水、渗水、发霉？", source:"GB 55015-2021", options:[
+      {label:"完全没有", score:5},
+      {label:"偶尔局部渗水", score:0},
+      {label:"经常漏水或大面积发霉", score:-5}
+    ]},
+    {id:"S03", level:"L0", text:"窗户是什么样的？冬天感觉透不透风？", source:"节能标准≤2.5W/m²K", options:[
+      {label:"双层中空玻璃，密封好", score:5},
+      {label:"单层玻璃但密封尚可", score:1},
+      {label:"单层钢窗/木窗，明显透风", score:-3}
+    ]},
+    {id:"S04", level:"L0", text:"窗户的把手或开关，老人用起来感觉怎么样？", source:"", options:[
+      {label:"开关很顺畅，不费劲", score:3},
+      {label:"能用，但有点紧或不太顺手", score:0},
+      {label:"生锈或坏了，拧不动也关不严", score:-2}
+    ]},
+    {id:"E01", level:"L0", text:"电路有没有跳闸、电灯忽明忽暗、电线裸露？", source:"GB 50054 低压配电", options:[
+      {label:"一切正常", score:4},
+      {label:"偶尔跳闸", score:-1},
+      {label:"电线裸露或频繁跳闸", score:-5}
+    ]},
+    {id:"E02", level:"L0", text:"卫生间有漏电保护吗？", source:"干货版·电气安全", options:[
+      {label:"有漏电保护开关，正常使用", score:3},
+      {label:"有但不清楚是否正常", score:0},
+      {label:"没有漏电保护", score:-3}
+    ]},
+    {id:"E03", level:"L0", text:"家里排水通畅吗？有没有反味、堵塞？", source:"地漏水封≥50mm", options:[
+      {label:"排水顺畅无异味", score:3},
+      {label:"偶尔堵塞/轻微反味", score:0},
+      {label:"经常堵塞或严重反味", score:-3}
+    ]},
+    {id:"E04", level:"L0", text:"有没有热水器？洗澡有水吗？", source:"GB 55038-2025", options:[
+      {label:"有恒温热水器", score:2},
+      {label:"有普通热水器", score:1},
+      {label:"没有热水器或洗澡不便", score:-2}
+    ]}
+  ],
+  // ── L1：门洞与通行（3题） ──
+  l1: [
+    {id:"D01", level:"L1", text:"入户门宽度够轮椅/担架通过吗？", source:"GB 55038-2025 入户≥900mm", options:[
+      {label:"≥90cm（够宽）", score:4},
+      {label:"80-90cm", score:1},
+      {label:"<80cm", score:-2}
+    ]},
+    {id:"D02", level:"L1", text:"室内所有门的净宽是否≥80cm？", source:"GB 55038-2025 内门≥800mm", options:[
+      {label:"都是", score:3},
+      {label:"大部分是", score:1},
+      {label:"多数门偏窄（<70cm）", score:-2}
+    ]},
+    {id:"D03", level:"L1", text:"门是否能完全打开（门后没被柜子挡住）？", source:"干货版·通行", options:[
+      {label:"所有门都能完全打开", score:3},
+      {label:"部分门被挡", score:0},
+      {label:"多数门打不开90度", score:-1}
+    ]}
+  ],
+  // ── L2：地面系统（5题） ──
+  l2_floor: [
+    {id:"F01", level:"L2", text:"卫生间/厨房地砖湿水后滑不滑？", source:"JGJ/T 331-2014 防滑等级R≥10", options:[
+      {label:"防滑地砖/防滑垫（R≥10）", score:4},
+      {label:"普通砖但粗糙", score:1},
+      {label:"湿水明显滑", score:-3}
+    ]},
+    {id:"F02", level:"L2", text:"房间之间有没有门槛或高低差？", source:"要求≤15mm斜坡过渡", options:[
+      {label:"≤15mm有斜坡过渡", score:4},
+      {label:"≤3cm小门槛", score:1},
+      {label:">3cm门槛", score:-3}
+    ]},
+    {id:"F03", level:"L2", text:"地上有没有散落电线、小地毯绊脚？", source:"", options:[
+      {label:"没有", score:3},
+      {label:"少量固定", score:0},
+      {label:"到处散落", score:-3}
+    ]},
+    {id:"F04", level:"L2", text:"过道最窄处能过助行器/轮椅吗？", source:"干货版·轮椅通行", options:[
+      {label:"≥90cm", score:2},
+      {label:"70-90cm", score:1},
+      {label:"<70cm", score:0}
+    ]},
+    {id:"F05", level:"L2", text:"老人穿的拖鞋防滑吗？", source:"", options:[
+      {label:"防滑底包脚鞋", score:2},
+      {label:"普通塑料拖鞋", score:0},
+      {label:"随便穿", score:-1}
+    ]}
+  ],
+  // ── L2：卫浴空间（6题） ──
+  l2_bath: [
+    {id:"B01", level:"L2", text:"马桶旁边有没有扶手？", source:"水平段距地650-700mm", options:[
+      {label:"L型专业扶手", score:3},
+      {label:"有但不牢固", score:0},
+      {label:"完全没有", score:-3}
+    ]},
+    {id:"B02", level:"L2", text:"马桶高度是否合适？老人坐下去站起来费不费劲？", source:"坐高450-500mm", options:[
+      {label:"高度匹配，轻松起立", score:2},
+      {label:"略矮但还行", score:1},
+      {label:"太矮，起立困难", score:-2}
+    ]},
+    {id:"B03", level:"L2", text:"淋浴区是浴缸还是花洒？", source:"浴缸深度≤500mm", options:[
+      {label:"淋浴+座椅", score:3},
+      {label:"淋浴无座椅", score:1},
+      {label:"老式浴缸跨进出", score:-3}
+    ]},
+    {id:"B04", level:"L2", text:"洗澡时地面积水吗？", source:"坡度≥1%", options:[
+      {label:"排水快不积水", score:2},
+      {label:"少量积水", score:0},
+      {label:"每次都泡水里", score:-2}
+    ]},
+    {id:"B05", level:"L2", text:"卫生间的门能外开或推拉吗？", source:"急救开门需要", options:[
+      {label:"外开或推拉门", score:2},
+      {label:"内开门但空间尚可", score:0},
+      {label:"内开且空间小", score:-2}
+    ]},
+    {id:"B06", level:"L2", text:"卫生间有紧急呼叫装置吗？", source:"拉绳末端距地≤100mm", options:[
+      {label:"有按钮+拉绳", score:3},
+      {label:"有手机但未必带", score:0},
+      {label:"都没有", score:-2}
+    ]}
+  ],
+  // ── L2：照明（4题） ──
+  l2_light: [
+    {id:"L01", level:"L2", text:"从卧室到卫生间晚上有夜灯吗？", source:"色温2700K暖光", options:[
+      {label:"感应夜灯全覆盖", score:3},
+      {label:"有小夜灯", score:1},
+      {label:"摸黑走", score:-2}
+    ]},
+    {id:"L02", level:"L2", text:"卧室灯开关在床头吗？", source:"干货版·多点控制", options:[
+      {label:"床头+门口双控", score:2},
+      {label:"门口单控", score:0},
+      {label:"离床很远", score:-2}
+    ]},
+    {id:"L03", level:"L2", text:"全屋亮度感觉够不够？", source:"全域照度≥200lux", options:[
+      {label:"很明亮（≥200lux）", score:3},
+      {label:"勉强看清", score:0},
+      {label:"昏暗", score:-2}
+    ]},
+    {id:"L04", level:"L2", text:"起夜路上有地脚感应灯吗？", source:"地脚灯离地200mm", options:[
+      {label:"有地脚感应灯", score:2},
+      {label:"只有普通照明", score:0},
+      {label:"没有", score:-2}
+    ]}
+  ],
+  // ── L2：厨房（4题） ──
+  l2_kitchen: [
+    {id:"K01", level:"L2", text:"燃气灶有没有自动熄火保护？", source:"GB 55038-2025", options:[
+      {label:"有自动熄火保护", score:3},
+      {label:"普通灶具", score:1},
+      {label:"很老没有保护", score:-2}
+    ]},
+    {id:"K02", level:"L2", text:"厨房有燃气/烟雾报警器吗？", source:"干货版·厨房安全", options:[
+      {label:"两种都有", score:3},
+      {label:"有一种", score:1},
+      {label:"都没有", score:-2}
+    ]},
+    {id:"K03", level:"L2", text:"吊柜东西老人够得着吗？", source:"挂衣杆≤1400mm", options:[
+      {label:"常用品在腰-胸之间", score:2},
+      {label:"部分需踮脚", score:0},
+      {label:"都要踮脚踩凳", score:-1}
+    ]},
+    {id:"K04", level:"L2", text:"操作台高度合不合适？", source:"台面650-800mm", options:[
+      {label:"高度合适", score:2},
+      {label:"偏高或偏低", score:0},
+      {label:"操作时腰酸", score:-1}
+    ]}
+  ],
+  // ── L2：收纳（3题） ──
+  l2_storage: [
+    {id:"T01", level:"L2", text:"家里大件柜子稳不稳？", source:"", options:[
+      {label:"全部稳固", score:2},
+      {label:"个别晃动", score:0},
+      {label:"多个不稳", score:-2}
+    ]},
+    {id:"T02", level:"L2", text:"衣柜挂衣区高度方便吗？", source:"", options:[
+      {label:"降低到1.2-1.5m", score:2},
+      {label:"标准需抬手", score:0},
+      {label:"要踮脚踩凳", score:-1}
+    ]},
+    {id:"T03", level:"L2", text:"常用药品和日用品位置固定吗？", source:"", options:[
+      {label:"有专门区域", score:1},
+      {label:"大致位置", score:0.5},
+      {label:"到处放", score:-1}
+    ]}
+  ],
+  // ── L2：智能设备（3题） ──
+  l2_smart: [
+    {id:"I01", level:"L2", text:"老人在家摔倒/不舒服，有办法求助吗？", source:"", options:[
+      {label:"呼叫器/手环/拉绳", score:2},
+      {label:"有手机但未必在身边", score:0.5},
+      {label:"没有", score:-2}
+    ]},
+    {id:"I02", level:"L2", text:"家里有远程看护设备吗？", source:"", options:[
+      {label:"有摄像头/雷达", score:2},
+      {label:"有但不常用", score:0},
+      {label:"没有", score:0}
+    ]},
+    {id:"I03", level:"L2", text:"门锁方便吗？", source:"", options:[
+      {label:"智能门锁（指纹/密码）", score:1},
+      {label:"普通门锁", score:0},
+      {label:"旧式挂锁", score:-1}
+    ]}
+  ]
+};
+
+// ═══════════════════════════════════════════════════════════
+// 应用程序
+// ═══════════════════════════════════════════════════════════
+let answers = {};        // {qId: selectedOptionIndex}
+let currentPhase = 'intro';
+
+const PHASES = ['intro','l0','l1','l2','report'];
+const L0_IDS = Q.l0.map(q=>q.id);
+const L1_IDS = Q.l1.map(q=>q.id);
+const L2_IDS = [...Q.l2_floor,...Q.l2_bath,...Q.l2_light,...Q.l2_kitchen,...Q.l2_storage,...Q.l2_smart].map(q=>q.id);
+const ALL_QUESTIONS = [...Q.l0,...Q.l1,...Q.l2_floor,...Q.l2_bath,...Q.l2_light,...Q.l2_kitchen,...Q.l2_storage,...Q.l2_smart];
+
+function render(){
+  const app = document.getElementById('app');
+  switch(currentPhase){
+    case 'intro': app.innerHTML = renderIntro(); break;
+    case 'l0': app.innerHTML = renderQuestionGroup('L0 基本居住保障', Q.l0, 'l0', '继续 → L1 门洞通行'); break;
+    case 'l1': app.innerHTML = renderQuestionGroup('L1 门洞与通行', Q.l1, 'l1', '继续 → L2 适老化评估'); break;
+    case 'l2': app.innerHTML = renderL2All(); break;
+    case 'report': app.innerHTML = renderReport(); break;
+  }
+  updateTabs();
+}
+
+function updateTabs(){
+  document.querySelectorAll('.phase-tab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.phase===currentPhase);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 首页
+// ═══════════════════════════════════════════════════════════
+function renderIntro(){
+  return `
+    <div class="question-card" style="padding:32px 24px">
+      <div style="text-align:left;max-width:560px;margin:0 auto">
+        <h2 style="font-size:20px;margin-bottom:16px">您好！我是您的居家安全评估助手</h2>
+        
+        <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:12px">
+          说实话，咱们中国家庭对适老化这个东西普遍认知不够。
+          很多子女觉得"爸妈身体还行，房子住了几十年也没事"——
+        </p>
+        <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:12px">
+          但实际上，全国每年有<b>4000万</b>老人会在家里摔倒，
+          一半以上就发生在卫生间、卧室门口这些最平常的地方。
+          髋部骨折的老人，一年内的死亡率能到<b>20-30%</b>。
+        </p>
+        <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:16px">
+          不过好消息是，现在国家和地方都在大力推广适老化改造，
+          像上海、福建等地都有专门的改造补贴。
+          早一步排查隐患，既是为老人的安全着想，
+          说不定还能赶上补贴政策。
+        </p>
+        <div style="background:#f0f7ff;border-radius:8px;padding:14px;margin-bottom:16px;font-size:13px;color:#444;line-height:1.6">
+          <b>评估说明：</b><br>
+          L0 <span style="color:#d32f2f">基本保障</span> → 房子能不能住人？<br>
+          L1 <span style="color:#f57c00">通行合规</span> → 门够不够宽？<br>
+          L2 <span style="color:#388e3c">适老化评估</span> → 房子适不适老？（6大模块）
+        </div>
+        <p style="font-size:13px;color:#888;margin-bottom:20px">
+          共 33 题 · 凭印象答就行 · 不知道的跳过也没关系
+        </p>
+      </div>
+      <div style="text-align:center">
+        <button class="btn btn-primary" onclick="goPhase('l0')" style="font-size:16px;padding:14px 40px">开始评估 →</button>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 问题组渲染
+// ═══════════════════════════════════════════════════════════
+function renderQuestionGroup(title, questions, prefix, nextLabel){
+  const n = questions.length;
+  const answered = questions.filter(q=>answers[q.id]!==undefined).length;
+  const progress = Math.round(answered/n*100);
+  
+  let html = `
+    <div class="progress"><div class="progress-bar" style="width:${progress}%"></div></div>
+    <div class="q-counter">${answered} / ${n} 题已回答</div>
+    <h3 style="margin-bottom:16px">${title}</h3>
+  `;
+  
+  questions.forEach((q,i)=>{
+    const sel = answers[q.id];
+    html += `
+      <div class="question-card">
+        <span class="q-level ${q.level.toLowerCase()}">${q.level}</span>
+        <div class="q-text">${q.id}. ${q.text}</div>
+        ${q.source ? `<div class="q-source">标准依据：${q.source}</div>` : ''}
+        <div class="options">
+    `;
+    q.options.forEach((opt,oi)=>{
+      html += `
+        <div class="option ${sel===oi?'selected':''}" onclick="selectAnswer('${q.id}',${oi})">
+          <input type="radio" name="${q.id}" ${sel===oi?'checked':''}>
+          <div>
+            <div class="option-text">${opt.label}</div>
+            <div class="option-points">${opt.score>0?'+':''}${opt.score}分</div>
+          </div>
+        </div>
+      `;
+    });
+    html += `</div></div>`;
+  });
+  
+  html += `
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="if('${prefix}'==='l0')goPhase('intro');else if('${prefix}'==='l1')goPhase('l0');else goPhase('l1')">← 返回</button>
+      <button class="btn btn-success" style="margin-left:auto" onclick="goPhase('${prefix==='l0'?'l1':'l2'}')">${nextLabel} →</button>
+    </div>
+  `;
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// L2 全部6个模块
+// ═══════════════════════════════════════════════════════════
+function renderL2All(){
+  const groups = [
+    {title:'🚽 地面系统', questions:Q.l2_floor, key:'l2_floor'},
+    {title:'🛁 卫浴空间', questions:Q.l2_bath, key:'l2_bath'},
+    {title:'💡 照明系统', questions:Q.l2_light, key:'l2_light'},
+    {title:'🍳 厨房安全', questions:Q.l2_kitchen, key:'l2_kitchen'},
+    {title:'🪑 收纳家具', questions:Q.l2_storage, key:'l2_storage'},
+    {title:'📡 智能设备', questions:Q.l2_smart, key:'l2_smart'}
+  ];
+  
+  const total = groups.reduce((s,g)=>s+g.questions.length,0);
+  const answered = groups.reduce((s,g)=>s+g.questions.filter(q=>answers[q.id]!==undefined).length,0);
+  const progress = Math.round(answered/total*100);
+  
+  let html = `
+    <div class="progress"><div class="progress-bar" style="width:${progress}%"></div></div>
+    <div class="q-counter">L2 适老化评估 · ${answered} / ${total} 题已回答</div>
+    <p style="font-size:13px;color:#666;margin-bottom:16px">六大模块，依次回答。不确定的可跳过。</p>
+  `;
+  
+  groups.forEach(g=>{
+    html += `<h3 style="margin:20px 0 8px">${g.title}</h3>`;
+    g.questions.forEach(q=>{
+      const sel = answers[q.id];
+      html += `
+        <div class="question-card">
+          <span class="q-level l2">L2</span>
+          <div class="q-text">${q.id}. ${q.text}</div>
+          ${q.source ? `<div class="q-source">标准：${q.source}</div>` : ''}
+          <div class="options">
+      `;
+      q.options.forEach((opt,oi)=>{
+        html += `
+          <div class="option ${sel===oi?'selected':''}" onclick="selectAnswer('${q.id}',${oi})">
+            <input type="radio" name="${q.id}" ${sel===oi?'checked':''}>
+            <div>
+              <div class="option-text">${opt.label}</div>
+              <div class="option-points">${opt.score>0?'+':''}${opt.score}分</div>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div></div>`;
+    });
+  });
+  
+  html += `
+    <div class="nav-row">
+      <button class="btn btn-secondary" onclick="goPhase('l1')">← 返回</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="goPhase('report')">📊 查看报告</button>
+    </div>
+  `;
+  return html;
+}
+
+// ═══════════════════════════════════════════════════════════
+// 选择答案
+// ═══════════════════════════════════════════════════════════
+function selectAnswer(qId, idx){
+  answers[qId] = idx;
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════
+// 切换标签
+// ═══════════════════════════════════════════════════════════
+function goPhase(phase){
+  currentPhase = phase;
+  render();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// 报告
+// ═══════════════════════════════════════════════════════════
+function calcScore(){
+  function compute(questions, maxScore){
+    let raw=0, min=0;
+    questions.forEach(q=>{
+      const sel = answers[q.id];
+      if(sel===undefined) return;
+      raw += q.options[sel].score;
+      const minOpt = Math.min(...q.options.map(o=>o.score));
+      min += minOpt;
+    });
+    return {raw, max:maxScore, min};
+  }
+  
+  const l0Score = compute(Q.l0, 30);    // 5+5+5+3+4+3+3+2=30
+  const l1Score = compute(Q.l1, 10);    // 4+3+3=10
+  const l2F = compute(Q.l2_floor, 15);
+  const l2B = compute(Q.l2_bath, 15);
+  const l2L = compute(Q.l2_light, 10);
+  const l2K = compute(Q.l2_kitchen, 10);
+  const l2S = compute(Q.l2_storage, 5);
+  const l2Sm = compute(Q.l2_smart, 5);
+  
+  const l2Total = {raw: l2F.raw + l2B.raw + l2L.raw + l2K.raw + l2S.raw + l2Sm.raw, max: 60};
+  
+  // 综合评分（L0:25% + L1:10% + L2:65%）
+  const l0Pct = l0Score.max>0 ? Math.max(0, l0Score.raw/l0Score.max) : 0;
+  const l1Pct = l1Score.max>0 ? Math.max(0, l1Score.raw/l1Score.max) : 0;
+  const l2Pct = l2Total.max>0 ? Math.max(0, l2Total.raw/l2Total.max) : 0;
+  
+  const score = Math.round((l0Pct*25 + l1Pct*10 + l2Pct*65));
+  
+  // L0 否决
+  const l0Raw = l0Score.raw;
+  
+  // 等级
+  let grade, gradeClass;
+  if(l0Raw < 0) { grade='E'; gradeClass='grade-E'; }
+  else if(score>=90) { grade='A'; gradeClass='grade-A'; }
+  else if(score>=70) { grade='B'; gradeClass='grade-B'; }
+  else if(score>=50) { grade='C'; gradeClass='grade-C'; }
+  else if(score>=30) { grade='D'; gradeClass='grade-D'; }
+  else { grade='E'; gradeClass='grade-E'; }
+  
+  // 风险标签
+  const risks = {high:[], mid:[]};
+  const riskMap = {
+    'S01_C':'🔴 结构安全隐患','S02_C':'🔴 屋面渗漏','S03_C':'🟡 单层玻璃透风','E01_C':'🔴 电路老化漏电',
+    'E02_C':'🔴 无漏电保护','E03_C':'🟡 排水反味','D01_C':'🟡 入户门偏窄',
+    'F01_C':'🔴 地面湿滑','F02_C':'🔴 门槛绊倒','F03_C':'🟡 地面散落物','B01_C':'🔴 无扶手如厕',
+    'B03_C':'🔴 浴缸跨入','B05_C':'🟡 内开门空间小','B06_C':'🔴 无紧急呼叫','L01_C':'🔴 摸黑行走',
+    'L02_C':'🟡 开关不便','L03_C':'🟡 照明不足','K01_C':'🔴 无燃气保护','K02_C':'🟡 无报警器',
+    'I01_C':'🟡 无呼救设备'
+  };
+  Object.keys(answers).forEach(qId=>{
+    const idx = answers[qId];
+    if(idx === undefined) return;
+    // 取到最后一个选项（下标2或3）则标记风险
+    const q = ALL_QUESTIONS.find(x=>x.id===qId);
+    if(!q) return;
+    const lastIdx = q.options.length-1;
+    const key = qId+(idx===lastIdx?'_C':'');
+    if(idx===lastIdx && riskMap[key]){
+      if(key.startsWith('S')||key.startsWith('E')||key.startsWith('F')||key==='B01_C'||key==='B03_C'||key==='B06_C'||key==='L01_C'||key==='K01_C'){
+        risks.high.push(riskMap[key]);
+      } else {
+        risks.mid.push(riskMap[key]);
+      }
+    }
+  });
+  
+  return {score, grade, gradeClass, l0Raw, l0Pct, l1Pct, l2Pct,
+    l0Score, l1Score, l2F, l2B, l2L, l2K, l2S, l2Sm,
+    risks};
+}
+
+function renderReport(){
+  const r = calcScore();
+  
+  function bar(pct, color){
+    const w = Math.max(3, Math.round(pct*100));
+    return `<div class="score-bar"><div class="score-fill" style="width:${w}%;background:${color}"><span class="score-label">${Math.round(pct*100)}%</span></div></div>`;
+  }
+  
+  const gradeLabels = {A:'🟢 A级 · 安全', B:'🟡 B级 · 关注', C:'🟠 C级 · 警示', D:'🔴 D级 · 紧急', E:'⚫ E级 · 不可居'};
+  const gradeDescriptions = {A:'基本无隐患，日常注意即可', B:'存在1-2项中风险，3个月内改造', C:'多项中高风险，1个月内启动改造', D:'严重隐患，立即改造', E:'先做基础改造再做适老化'};
+  
+  const answeredCount = Object.keys(answers).length;
+  const totalCount = ALL_QUESTIONS.length;
+  
+  let html = `
+    <div class="question-card" style="text-align:center;padding:24px">
+      <div style="font-size:13px;color:#888;margin-bottom:8px">${answeredCount} / ${totalCount} 题回答</div>
+      <div class="grade-badge ${r.gradeClass}" style="margin-bottom:8px">
+        ${gradeLabels[r.grade]}<br>
+        <span style="font-size:14px;font-weight:400">${r.score} 分 · ${gradeDescriptions[r.grade]}</span>
+      </div>
+    </div>
+  `;
+  
+  // 痛点数据提示
+  if(r.score < 90){
+    html += `
+    <div class="report-section" style="background:#fef7e0;border-left:4px solid #f9a825">
+      <h3>📌 为什么这个评估很重要</h3>
+      <p style="font-size:13px;margin:6px 0;line-height:1.6">
+        我国每年约有<b>4000万</b>65岁以上老人至少跌倒1次，
+        <b>56.7%</b>发生在自己家中，
+        <b>30%</b>发生在卫生间。
+        髋部骨折后一年内死亡率高达<b>20-30%</b>。
+      </p>
+      <p style="font-size:13px;color:#555;margin-top:6px">
+        很多老人摔倒后没有及时呼救，错过最佳救治时间。
+        防患于未然，比事后补救重要得多。
+      </p>
+    </div>`;
+  }
+  
+  // 否决提示
+  if(r.l0Raw < 0){
+    html += `
+      <div class="report-section" style="border-left:4px solid #d32f2f">
+        <h3>⚠️ L0 基本保障未通过</h3>
+        <p style="font-size:13px;color:#555;margin-top:4px">结构安全/电气给排水存在严重问题。建议优先联系住建部门申请老旧小区综合整治，再推进适老化改造。</p>
+      </div>
+    `;
+  }
+  
+  // 三层雷达
+  html += `
+    <div class="report-section">
+      <h3>📊 三层评分</h3>
+      <div class="result-module">
+        <h3><span style="color:#d32f2f">L0</span> 基本居住保障 <span style="font-size:13px;color:#888;margin-left:auto">${r.l0Score.raw}/${r.l0Score.max}分</span></h3>
+        ${bar(r.l0Pct, '#d32f2f')}
+      </div>
+      <div class="result-module">
+        <h3><span style="color:#f57c00">L1</span> 门洞通行 <span style="font-size:13px;color:#888">${r.l1Score.raw}/${r.l1Score.max}分</span></h3>
+        ${bar(r.l1Pct, '#f57c00')}
+      </div>
+      <div class="result-module">
+        <h3><span style="color:#388e3c">L2</span> 适老化评估 <span style="font-size:13px;color:#888">${r.l2F.raw+r.l2B.raw+r.l2L.raw+r.l2K.raw+r.l2S.raw+r.l2Sm.raw}/${r.l2F.max+r.l2B.max+r.l2L.max+r.l2K.max+r.l2S.max+r.l2Sm.max}分</span></h3>
+        ${bar(r.l2Pct, '#388e3c')}
+      </div>
+    </div>
+  `;
+  
+  // L2 各模块
+  html += `<div class="report-section"><h3>📐 L2 六大模块详情</h3>`;
+  const modules = [
+    {label:'地面系统', data:r.l2F, color:'#1976d2'},
+    {label:'卫浴空间', data:r.l2B, color:'#00796b'},
+    {label:'照明系统', data:r.l2L, color:'#f9a825'},
+    {label:'厨房安全', data:r.l2K, color:'#e64a19'},
+    {label:'收纳家具', data:r.l2S, color:'#6a1b9a'},
+    {label:'智能设备', data:r.l2Sm, color:'#37474f'}
+  ];
+  modules.forEach(m=>{
+    const pct = m.data.max>0 ? Math.max(0, m.data.raw/m.data.max) : 0;
+    html += `
+      <div class="result-module">
+        <h3>${m.label} <span style="font-size:13px;color:#888;margin-left:auto">${m.data.raw}/${m.data.max}分</span></h3>
+        ${bar(pct, m.color)}
+      </div>
+    `;
+  });
+  html += `</div>`;
+  
+  // 风险标签
+  html += `
+    <div class="report-section">
+      <h3>🚨 风险标签</h3>
+      ${r.risks.high.length===0 && r.risks.mid.length===0 ? '<p style="color:#888;font-size:13px">暂无风险标签（部分题目未回答）</p>' : ''}
+      ${r.risks.high.map(t=>`<span class="risk-tag risk-high">${t}</span>`).join('')}
+      ${r.risks.mid.map(t=>`<span class="risk-tag risk-mid">${t}</span>`).join('')}
+    </div>
+  `;
+  
+  // 改造建议
+  html += `
+    <div class="report-section">
+      <h3>🛠️ 改造建议</h3>
+      <ul style="margin:8px 0;padding-left:20px;font-size:14px;line-height:1.8">
+  `;
+  let hasAdvice = false;
+  const adviceMap = {
+    'S03':['🚨 窗户透风 → 更换双层中空玻璃窗（约70元/㎡）'],
+    'E01':['🚨 电路安全隐患 → 请电工全面检查线路'],
+    'E02':['🚨 无漏电保护 → 安装漏电保护开关（约200元）'],
+    'F01':['🚨 地面湿滑 → 铺防滑垫或换防滑砖（200-500元）'],
+    'F02':['🚨 门槛绊倒 → 加装斜坡过渡条（约50元）'],
+    'B01':['🚨 无扶手 → 加装L型扶手（约200元）'],
+    'B03':['🚨 浴缸跨入 → 改为淋浴+座椅（1k-3k元）'],
+    'B06':['🚨 无紧急呼叫 → 安装呼叫按钮（200-500元）'],
+    'L01':['🔥 摸黑行走 → 安装感应夜灯1-3个（100-300元）'],
+    'K01':['🚨 无燃气保护 → 更换带熄火保护灶具'],
+    'K02':['🔥 无报警器 → 安装燃气/烟雾报警器（约100元）'],
+    'I01':['🔥 无呼救设备 → 配置紧急呼叫器/手环（300-800元）']
+  };
+  ALL_QUESTIONS.forEach(q=>{
+    const idx = answers[q.id];
+    if(idx === undefined) return;
+    const lastIdx = q.options.length-1;
+    if(idx===lastIdx && adviceMap[q.id]){
+      hasAdvice = true;
+      adviceMap[q.id].forEach(a=>{html += `<li>${a}</li>`;});
+    }
+  });
+  if(!hasAdvice) html += '<li style="color:#888">暂无紧急建议，继续保持！</li>';
+  html += `</ul></div>`;
+  
+  // 预算
+  let budgetSuggestion = '轻量级（≤500元）';
+  // 预算分级 —— 完整版
+  let budgetDesc;
+  if(r.score<50){
+    budgetDesc = [
+      {level:'第一步 · 基础安全改造（约3k-5k元）',
+       items:[
+         '马桶旁加装L型扶手',
+         '卫生间地面防滑处理',
+         '淋浴区改造（浴缸改淋浴+座椅）',
+         '安装紧急呼叫按钮',
+         '门槛过渡条消除高差'
+       ]},
+      {level:'第二步 · 居住品质提升（约5k-10k元）',
+       items:[
+         '全屋感应夜灯（卧室到卫生间动线）',
+         '燃气/烟雾报警器',
+         '窗户密封修补或更换',
+         '加装漏电保护开关',
+         '衣柜高度调整'
+       ]},
+      {level:'第三步 · 全面适老化升级（约10k-30k元）',
+       items:[
+         '全屋门窗更换（双层中空玻璃）',
+         '厨卫全面翻新',
+         '全屋智能看护系统',
+         '智能门锁'
+       ]}
+    ];
+  } else if(r.score<70){
+    budgetDesc = [
+      {level:'第一步 · 重点隐患改造（约3k-5k元）',
+       items:[
+         '针对报告中标出的高风险项优先处理',
+         '卫生间扶手+防滑',
+         '紧急呼叫装置',
+         '门槛过渡条'
+       ]},
+      {level:'第二步 · 品质提升（约5k-10k元）',
+       items:[
+         '全屋感应夜灯',
+         '燃气/烟雾报警器',
+         '窗户密封修补或更换',
+         '衣柜高度调整'
+       ]},
+      {level:'第三步 · 全面升级（约10k-30k元）',
+       items:[
+         '全屋门窗更换',
+         '厨卫翻新',
+         '智能看护系统'
+       ]}
+    ];
+  } else if(r.score<90){
+    budgetDesc = [
+      {level:'重点部位整改（约3k-10k元）',
+       items:[
+         '针对报告中标出的风险项逐项处理',
+         '卫生间安全升级（扶手+防滑）',
+         '紧急呼叫装置',
+         '感应夜灯'
+       ]},
+      {level:'全面品质提升（约5k-20k元）',
+       items:[
+         '全屋门窗更换',
+         '智能看护设备',
+         '适老家具更新'
+       ]}
+    ];
+  } else {
+    budgetDesc = [
+      {level:'针对性优化（约5k元以内）',
+       items:[
+         '根据报告中的建议项逐项针对性加装或更换',
+         '继续保持定期复评'
+       ]}
+    ];
+  }
+  
+  html += `
+    <div class="report-section">
+      <h3>💰 改造方案参考</h3>
+      ${budgetDesc.map(b=>`
+        <div style="margin:10px 0;padding:10px 12px;background:#fafafa;border-radius:8px">
+          <div style="font-weight:500;font-size:13px;margin-bottom:4px">${b.level}</div>
+          <ul style="margin:0;padding-left:16px;font-size:12px;color:#555;line-height:1.7">
+            ${b.items.map(i=>`<li>${i}</li>`).join('')}
+          </ul>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  
+  // 免责声明
+  html += `
+    <div class="report-section" style="background:#fafafa;border:1px solid #e0e0e0">
+      <h3 style="font-size:13px;color:#888">⚖️ 免责声明</h3>
+      <p style="font-size:12px;color:#999;line-height:1.5;margin-top:4px">
+        本评估结果基于用户提供的问答信息自动生成，仅作为居家安全参考，不构成专业改造设计或施工依据。
+        房屋结构安全、电气改造等涉及生命安全的项目，须由具备相应资质的专业机构现场勘查后出具正式方案。
+        具体改造费用受地区、材料品牌、施工难度等因素影响，以实际报价为准。
+        评估方不对因依据本报告进行改造而产生的一切后果承担责任。
+      </p>
+    </div>
+  `;
+  
+  // 底部操作
+  html += `
+    <div class="nav-row" style="margin-top:24px">
+      <button class="btn btn-secondary" onclick="goPhase('l2')">← 修改答案</button>
+      <button class="btn btn-secondary" onclick="resetAll()" style="margin-left:8px">🔄 重新评估</button>
+    </div>
+  `;
+  
+  return html;
+}
+
+function resetAll(){
+  if(!confirm('确定重新评估？所有答案将被清除。')) return;
+  answers = {};
+  goPhase('intro');
+}
+
+// 启动
+render();
+</script>
+</body>
+</html>
