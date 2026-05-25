@@ -111,8 +111,8 @@ header span{font-size:12px;color:#888;margin-left:auto}
     <div class="success" id="modalSuccess">
       <div class="icon">✅</div>
       <h3 style="font-size:17px;margin-bottom:4px">提交成功！</h3>
-      <p>您的评估报告已生成<br>稍后会有专属顾问与您联系</p>
-      <button class="btn btn-primary" onclick="showFullReport()" style="margin-top:16px;font-size:15px">查看完整报告 →</button>
+      <p>您的信息已提交成功<br>专属顾问将在24小时内联系您，<br>提供完整的评估报告和改造建议</p>
+      <button class="btn btn-primary" onclick="showFullReport()" style="margin-top:16px;font-size:15px">查看评估概要 →</button>
     </div>
   </div>
 </div>
@@ -355,13 +355,16 @@ function render(){
     case 'l1': app.innerHTML = renderQuestionGroup('L1 门洞与通行', Q.l1, 'l1', '继续 → L2 适老化评估'); break;
     case 'l2': app.innerHTML = renderL2All(); break;
     case 'report': app.innerHTML = renderReport(); break;
+    case 'brief': app.innerHTML = renderBriefReport(); break;
   }
   updateTabs();
 }
 
 function updateTabs(){
   document.querySelectorAll('.phase-tab').forEach(t=>{
-    t.classList.toggle('active', t.dataset.phase===currentPhase);
+    const isActive = t.dataset.phase === currentPhase ||
+      (currentPhase === 'brief' && t.dataset.phase === 'report');
+    t.classList.toggle('active', isActive);
   });
 }
 
@@ -522,8 +525,12 @@ function selectAnswer(qId, idx){
 // 切换标签
 // ═══════════════════════════════════════════════════════════
 function goPhase(phase){
-  if(phase === 'report' && !leadSubmitted && Object.keys(answers).length > 0){
-    showLeadModal();
+  if(phase === 'report' && Object.keys(answers).length > 0){
+    if(leadSubmitted){
+      showFullReport();
+    } else {
+      showLeadModal();
+    }
     return;
   }
   currentPhase = phase;
@@ -956,7 +963,62 @@ async function submitLead(){
 
 function showFullReport(){
   hideLeadModal();
-  goPhase('report');
+  currentPhase = 'brief';
+  render();
+}
+
+// ═══════════════════════════════════════════════════════════
+// 简要报告（留资可见，完整版需专属顾问联系）
+// ═══════════════════════════════════════════════════════════
+function renderBriefReport(){
+  const r = calcScore();
+
+  const gradeLabels = {A:'🟢 A级 · 安全', B:'🟡 B级 · 关注', C:'🟠 C级 · 警示', D:'🔴 D级 · 紧急', E:'⚫ E级 · 不可居'};
+  const gradeDesc = {A:'基本无隐患，日常注意即可', B:'存在1-2项中风险', C:'多项中高风险', D:'严重隐患，立即改造', E:'先做基础改造再做适老化'};
+
+  const allRisks = [...r.risks.high, ...r.risks.mid];
+  const topRisks = allRisks.slice(0, 3);
+
+  return `
+    <div class="question-card" style="text-align:center;padding:24px">
+      <div style="font-size:13px;color:#888;margin-bottom:8px">${Object.keys(answers).length} / ${ALL_QUESTIONS.length} 题回答</div>
+      <div class="grade-badge ${r.gradeClass}" style="margin-bottom:8px">
+        ${gradeLabels[r.grade]}<br>
+        <span style="font-size:14px;font-weight:400">${r.score} 分 · ${gradeDesc[r.grade]}</span>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h3>🚨 主要风险概览</h3>
+      ${topRisks.length === 0 ? '<p style="color:#888;font-size:13px">您的居家安全状况整体良好</p>' : ''}
+      ${topRisks.map(t => `<span class="risk-tag ${t.startsWith('🔴')?'risk-high':'risk-mid'}">${t}</span>`).join('')}
+    </div>
+
+    <div class="report-section" style="background:#fef7e0;border-left:4px solid #f9a825">
+      <h3>📋 完整报告获取方式</h3>
+      <p style="font-size:13px;line-height:1.7;margin:8px 0 4px">
+        您的专属安全顾问将在<b>24小时内</b>与您联系，提供：
+      </p>
+      <ul style="font-size:13px;color:#555;line-height:1.8;padding-left:18px">
+        <li>逐项安全评分及详细分析</li>
+        <li>针对您住宅的定制改造方案</li>
+        <li>改造预算分级建议</li>
+        <li>当地适老化改造补贴政策参考</li>
+      </ul>
+    </div>
+
+    <div class="report-section" style="background:#f5f9ff;border:1px solid #e0e0e0">
+      <p style="font-size:13px;color:#888;line-height:1.6;text-align:center">
+        💡 您也可以主动联系我们的顾问<br>
+        <span style="font-size:16px;font-weight:500;color:#1a73e8">勇哥：1XX-XXXX-XXXX</span>
+      </p>
+    </div>
+
+    <div class="nav-row" style="margin-top:24px">
+      <button class="btn btn-secondary" onclick="goPhase('l2')">← 修改答案</button>
+      <button class="btn btn-secondary" onclick="resetAll()" style="margin-left:8px">🔄 重新评估</button>
+    </div>
+  `;
 }
 
 // 启动
