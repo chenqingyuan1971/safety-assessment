@@ -61,6 +61,20 @@ header span{font-size:12px;color:#888;margin-left:auto}
 .risk-mid{background:#fff3e0;color:#e65100}
 .report-section{background:#fff;border-radius:12px;padding:20px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
 .hidden{display:none}
+
+/* 留资弹窗 */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center}
+.modal{background:#fff;border-radius:16px;padding:32px 28px;max-width:400px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal h3{font-size:18px;margin-bottom:6px}
+.modal .sub{font-size:13px;color:#666;line-height:1.6;margin-bottom:20px}
+.modal input{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:15px;margin-bottom:12px;outline:none;transition:.15s}
+.modal input:focus{border-color:#1a73e8}
+.modal .error-msg{font-size:12px;color:#d32f2f;margin-bottom:8px;display:none}
+.modal .loading{font-size:13px;color:#888;margin:12px 0;display:none}
+.modal .success{display:none;padding:16px 0}
+.modal .success .icon{font-size:48px;margin-bottom:8px}
+.modal .success p{font-size:14px;color:#555;line-height:1.6}
+
 @media(max-width:480px){.container{padding:12px 10px}.question-card{padding:16px;margin-bottom:10px}.phase-tab{padding:10px 12px;font-size:12px}}
 </style>
 </head>
@@ -68,6 +82,7 @@ header span{font-size:12px;color:#888;margin-left:auto}
 
 <header>
   <h1>🏠 适老化安全评估</h1>
+  <span>居家安全AI评估工具</span>
   <span>居家安全AI评估工具</span>
 </header>
 
@@ -81,7 +96,35 @@ header span{font-size:12px;color:#888;margin-left:auto}
 
 <div class="container" id="app"></div>
 
+<!-- 留资弹窗 -->
+<div id="leadModal" class="modal-overlay hidden" style="display:none">
+  <div class="modal">
+    <div id="modalForm">
+      <h3>📋 获取完整评估报告</h3>
+      <div class="sub">填写信息后即可查看详细评分、逐项改造方案和预算建议</div>
+      <input type="text" id="leadName" placeholder="您的姓名" maxlength="20">
+      <input type="tel" id="leadPhone" placeholder="手机号码" maxlength="11">
+      <div class="error-msg" id="leadError"></div>
+      <button class="btn btn-primary" onclick="submitLead()" style="width:100%;font-size:15px;padding:14px">获取完整报告 →</button>
+      <div class="loading" id="leadLoading">提交中...</div>
+    </div>
+    <div class="success" id="modalSuccess">
+      <div class="icon">✅</div>
+      <h3 style="font-size:17px;margin-bottom:4px">提交成功！</h3>
+      <p>您的评估报告已生成<br>稍后会有专属顾问与您联系</p>
+      <button class="btn btn-primary" onclick="showFullReport()" style="margin-top:16px;font-size:15px">查看完整报告 →</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ═══════════════════════════════════════════════════════════
+// 配置
+// ═══════════════════════════════════════════════════════════
+const API_BASE = window.location.origin;
+
+let leadSubmitted = false;
+
 // ═══════════════════════════════════════════════════════════
 // 问题数据（5+3+25 = 33 题）
 // ═══════════════════════════════════════════════════════════
@@ -461,7 +504,7 @@ function renderL2All(){
   html += `
     <div class="nav-row">
       <button class="btn btn-secondary" onclick="goPhase('l1')">← 返回</button>
-      <button class="btn btn-primary" style="margin-left:auto" onclick="goPhase('report')">📊 查看报告</button>
+      <button class="btn btn-primary" style="margin-left:auto" onclick="showLeadModal()">📊 查看报告</button>
     </div>
   `;
   return html;
@@ -479,6 +522,10 @@ function selectAnswer(qId, idx){
 // 切换标签
 // ═══════════════════════════════════════════════════════════
 function goPhase(phase){
+  if(phase === 'report' && !leadSubmitted && Object.keys(answers).length > 0){
+    showLeadModal();
+    return;
+  }
   currentPhase = phase;
   render();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -817,7 +864,99 @@ function renderReport(){
 function resetAll(){
   if(!confirm('确定重新评估？所有答案将被清除。')) return;
   answers = {};
+  leadSubmitted = false;
   goPhase('intro');
+}
+
+// ═══════════════════════════════════════════════════════════
+// 留资功能
+// ═══════════════════════════════════════════════════════════
+
+function showLeadModal(){
+  if(leadSubmitted){
+    goPhase('report');
+    return;
+  }
+  const modal = document.getElementById('leadModal');
+  modal.style.display = 'flex';
+  modal.onclick = function(e){ if(e.target === this) hideLeadModal(); };
+  document.getElementById('modalForm').style.display = 'block';
+  document.getElementById('modalSuccess').style.display = 'none';
+  document.getElementById('leadError').style.display = 'none';
+  document.getElementById('leadLoading').style.display = 'none';
+  document.getElementById('leadName').value = '';
+  document.getElementById('leadPhone').value = '';
+}
+
+function hideLeadModal(){
+  document.getElementById('leadModal').style.display = 'none';
+}
+
+async function submitLead(){
+  const name = document.getElementById('leadName').value.trim();
+  const phone = document.getElementById('leadPhone').value.trim();
+  const errorEl = document.getElementById('leadError');
+
+  if(!name || name.length < 2){
+    errorEl.textContent = '请输入真实姓名';
+    errorEl.style.display = 'block';
+    return;
+  }
+  if(!/^1\d{10}$/.test(phone)){
+    errorEl.textContent = '请输入正确的11位手机号';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  errorEl.style.display = 'none';
+  document.getElementById('leadLoading').style.display = 'block';
+
+  // 收集评估数据
+  const r = calcScore();
+  const allAnswers = {};
+  ALL_QUESTIONS.forEach(q => {
+    if(answers[q.id] !== undefined){
+      allAnswers[q.id] = {
+        answer: q.options[answers[q.id]].label,
+        score: q.options[answers[q.id]].score
+      };
+    }
+  });
+
+  try{
+    const resp = await fetch(API_BASE + '/api/submit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name,
+        phone,
+        score: r.score,
+        grade: r.grade,
+        answers: allAnswers,
+        risks: [...r.risks.high, ...r.risks.mid]
+      })
+    });
+    const data = await resp.json();
+    document.getElementById('leadLoading').style.display = 'none';
+
+    if(data.ok){
+      leadSubmitted = true;
+      document.getElementById('modalForm').style.display = 'none';
+      document.getElementById('modalSuccess').style.display = 'block';
+    } else {
+      errorEl.textContent = data.error || '提交失败，请稍后重试';
+      errorEl.style.display = 'block';
+    }
+  } catch(e){
+    document.getElementById('leadLoading').style.display = 'none';
+    errorEl.textContent = '网络错误，请检查连接后重试';
+    errorEl.style.display = 'block';
+  }
+}
+
+function showFullReport(){
+  hideLeadModal();
+  goPhase('report');
 }
 
 // 启动
