@@ -8,17 +8,19 @@
 <style>
 :root{--bg:#f6f2ea;--card:#fffdf9;--ink:#2f2b26;--sub:#7d7469;--line:#e6ded1;--brand:#8a6a45;--good:#3f7d5c;--mid:#b9891f;--bad:#b4553c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
-.wrap{max-width:620px;margin:0 auto;padding:0 18px 40px}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:16px 0;font-size:13px;color:var(--sub);border-bottom:1px solid var(--line)}
+body{margin:0;-webkit-text-size-adjust:100%;background:var(--bg);color:var(--ink);font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+.wrap{max-width:620px;margin:0 auto;padding:0 18px calc(96px + env(safe-area-inset-bottom))}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 0;font-size:13px;color:var(--sub);border-bottom:1px solid var(--line)}
+.topbar>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#prog{flex:0 0 auto;white-space:nowrap}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin:18px 0}
-h1{font-size:24px;line-height:1.4;margin:0 0 10px;font-weight:600}
+h1{font-size:clamp(20px,5.6vw,24px);line-height:1.4;margin:0 0 10px;font-weight:600}
 h2{font-size:19px;margin:0 0 12px;font-weight:600}
 p{margin:0 0 12px}
 .sub{color:var(--sub);font-size:14px}
-.btn{display:block;width:100%;padding:15px;border:0;border-radius:12px;background:var(--brand);color:#fff;font-size:17px;font-weight:600;text-align:center;text-decoration:none}
+.btn{display:block;width:100%;padding:15px;border:0;touch-action:manipulation;border-radius:12px;background:var(--brand);color:#fff;font-size:17px;font-weight:600;text-align:center;text-decoration:none}
 .btn.ghost{background:transparent;color:var(--brand);border:1px solid var(--brand)}
-.opt{display:block;width:100%;text-align:left;padding:15px 16px;margin:10px 0;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:16px;line-height:1.5;color:var(--ink)}
+.opt{display:block;width:100%;text-align:left;padding:15px 16px;touch-action:manipulation;margin:10px 0;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:16px;line-height:1.5;color:var(--ink)}
 .opt.sel{border-color:var(--brand);background:#fbf6ee}
 .field{margin:12px 0}
 .field label{display:block;font-size:14px;color:var(--sub);margin-bottom:6px}
@@ -31,20 +33,35 @@ p{margin:0 0 12px}
 .fix{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
 .fix b{display:block;margin-bottom:4px}
 .mini{font-size:13px;color:var(--sub);margin-top:6px}
-#bgmbtn{margin-left:8px;width:30px;height:30px;border-radius:50%;border:1px solid #e6ded1;background:#fff;color:#7d7469;font-size:15px;line-height:1;padding:0;cursor:pointer;vertical-align:middle}
+#bgmbtn{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;touch-action:manipulation;min-height:40px;padding:9px 14px;border-radius:22px;border:1px solid #8a6a45;background:#fffdf9;color:#8a6a45;font-size:13px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.10);cursor:pointer}
+#bgmbtn.off{color:#7d7469;border-color:#e6ded1;background:#faf7f1}
 .foot{max-width:620px;margin:0 auto;padding:0 18px 30px;font-size:12px;color:var(--sub);line-height:1.6}
 .pill{display:inline-block;padding:2px 8px;border-radius:8px;font-size:12px;background:#f3ece0;color:var(--sub);margin-left:6px}
 .warn{color:var(--bad)}
 .ok{color:var(--good)}
 .hint{background:#fbf6ee;border-left:3px solid var(--brand);padding:10px 12px;border-radius:8px;font-size:14px;margin:12px 0}
+.opt:active{background:#f6efe3}
+.btn:active{opacity:.88}
+@media (max-width:420px){
+h1{font-size:21px}
+h2{font-size:18px}
+.card{padding:18px 16px;border-radius:14px}
+.wrap{padding:0 14px calc(92px + env(safe-area-inset-bottom))}
+.topbar{font-size:12px;padding:12px 0}
+.score{font-size:46px}
+.btn{padding:16px 14px;font-size:16px}
+.opt{padding:14px;font-size:15px}
+.foot{padding:0 14px 26px;font-size:11px}
+}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><span>勇哥大宅全案统筹 · 适老化改造设计</span><span><span id="prog"></span><button id="bgmbtn" onclick="toggleBgm()" title="背景音乐开关" aria-label="背景音乐开关">♪</button></span></div>
+  <div class="topbar"><span>勇哥大宅全案统筹 · 适老化改造设计</span><span id="prog"></span></div>
   <div id="app"></div>
 </div>
 <audio id="bgm" src="bgm.mp3" loop preload="none"></audio>
+<button id="bgmbtn" onclick="toggleBgm()" aria-label="背景音乐开关">音乐 开</button>
 <div class="foot">评估结果仅供参考，不作为医疗或安全承诺。标准数值以现行规范为准，预算区间为行业经验值。</div>
 <script>
 const MODULES = [
@@ -1295,6 +1312,7 @@ function startBatch(list, after){ QUIZ = { list:list, idx:0, after:after }; go('
 function nextQ(){
   QUIZ.idx++;
   if(QUIZ.idx >= QUIZ.list.length){ const after = QUIZ.after; QUIZ = null; return go(after); }
+  window.scrollTo(0,0);
   render();
 }
 function viewQuiz(){
@@ -1432,9 +1450,9 @@ let bgmOn = (localStorage.getItem(BGM_KEY) || BGM_DEFAULT) === "on";
 function bgmPaint(){
   const b = document.getElementById("bgmbtn");
   if(!b) return;
-  b.style.color = bgmOn ? "#8a6a45" : "#7d7469";
-  b.style.borderColor = bgmOn ? "#8a6a45" : "#e6ded1";
-  b.title = bgmOn ? "背景音乐：开，点一下关闭" : "背景音乐：关，点一下打开";
+  b.textContent = bgmOn ? "音乐 开" : "音乐 关";
+  if(bgmOn){ b.classList.remove("off"); } else { b.classList.add("off"); }
+  b.title = bgmOn ? "背景音乐已开，点一下关闭" : "背景音乐已关，点一下打开";
 }
 function bgmStart(){
   const a = document.getElementById("bgm");
