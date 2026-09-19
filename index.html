@@ -33,7 +33,12 @@ p{margin:0 0 12px}
 .fix{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
 .fix b{display:block;margin-bottom:4px}
 .mini{font-size:13px;color:var(--sub);margin-top:6px}
-#bgmbtn{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;touch-action:manipulation;min-height:40px;padding:9px 14px;border-radius:22px;border:1px solid #8a6a45;background:#fffdf9;color:#8a6a45;font-size:13px;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.10);cursor:pointer}
+#bgmbtn{position:fixed;right:14px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:60;touch-action:manipulation;width:42px;height:42px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%;border:1px solid #8a6a45;background:#fffdf9;color:#8a6a45;box-shadow:0 2px 12px rgba(0,0,0,.12);cursor:pointer}
+#bgmbtn .i-on{display:block}
+#bgmbtn .i-off{display:none}
+#bgmbtn.off .i-on{display:none}
+#bgmbtn.off .i-off{display:block}
+#bgmbtn.off{color:#8d8478;border-color:#e6ded1;background:#faf7f1}
 #bgmbtn.off{color:#7d7469;border-color:#e6ded1;background:#faf7f1}
 .foot{max-width:620px;margin:0 auto;padding:0 18px 30px;font-size:12px;color:var(--sub);line-height:1.6}
 .pill{display:inline-block;padding:2px 8px;border-radius:8px;font-size:12px;background:#f3ece0;color:var(--sub);margin-left:6px}
@@ -61,7 +66,10 @@ h2{font-size:18px}
   <div id="app"></div>
 </div>
 <audio id="bgm" src="bgm.mp3" loop preload="none"></audio>
-<button id="bgmbtn" onclick="toggleBgm()" aria-label="背景音乐开关">音乐 开</button>
+<button id="bgmbtn" onclick="toggleBgm()" aria-label="背景音乐开关" title="背景音乐">
+<svg class="i-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V5.5l9-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="15.5" cy="15" r="2.5"/></svg>
+<svg class="i-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V5.5l9-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="15.5" cy="15" r="2.5"/><line x1="4.5" y1="4.5" x2="19.5" y2="19.5"/></svg>
+</button>
 <div class="foot">评估结果仅供参考，不作为医疗或安全承诺。标准数值以现行规范为准，预算区间为行业经验值。</div>
 <script>
 const MODULES = [
@@ -1450,7 +1458,6 @@ let bgmOn = (localStorage.getItem(BGM_KEY) || BGM_DEFAULT) === "on";
 function bgmPaint(){
   const b = document.getElementById("bgmbtn");
   if(!b) return;
-  b.textContent = bgmOn ? "音乐 开" : "音乐 关";
   if(bgmOn){ b.classList.remove("off"); } else { b.classList.add("off"); }
   b.title = bgmOn ? "背景音乐已开，点一下关闭" : "背景音乐已关，点一下打开";
 }
@@ -1460,16 +1467,18 @@ function bgmStart(){
   a.play().catch(function(){ const b = document.getElementById("bgmbtn"); if(b) b.style.display = "none"; });
 }
 function toggleBgm(){
+  const a = document.getElementById("bgm");
+  if(!a) return;
+  if(bgmOn && a.paused && !a.currentTime){ a.play().catch(function(){}); bgmPaint(); return; }
   bgmOn = !bgmOn;
   try{ localStorage.setItem(BGM_KEY, bgmOn ? "on" : "off"); }catch(e){}
-  const a = document.getElementById("bgm");
-  if(a){ if(bgmOn){ a.play().catch(function(){}); } else { a.pause(); } }
+  if(bgmOn){ a.play().catch(function(){}); } else { a.pause(); }
   bgmPaint();
 }
 function bgmInit(){
   const a = document.getElementById("bgm");
   if(!a) return;
-  a.volume = 0.35;
+  a.volume = 0.5;
   a.addEventListener("error", function(){ const b = document.getElementById("bgmbtn"); if(b) b.style.display = "none"; });
   document.addEventListener("pointerdown", bgmStart, { once:true });
   bgmPaint();
