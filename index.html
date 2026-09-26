@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6f2ea">
-<title>居家适老化安全快评</title>
+<title>居家适老化体检 · 安全初检</title>
 <style>
 :root{--bg:#f6f2ea;--card:#fffdf9;--ink:#2f2b26;--sub:#7d7469;--line:#e6ded1;--brand:#8a6a45;--good:#3f7d5c;--mid:#b9891f;--bad:#b4553c}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -62,7 +62,7 @@ h2{font-size:18px}
 </head>
 <body>
 <div class="wrap">
-  <div class="topbar"><span>勇哥大宅全案统筹 · 适老化改造设计</span><span id="prog"></span></div>
+  <div class="topbar"><span>居家适老化体检 · 勇哥大宅全案统筹</span><span id="prog"></span></div>
   <div id="app"></div>
 </div>
 <audio id="bgm" src="bgm.mp3" loop preload="none"></audio>
@@ -70,7 +70,7 @@ h2{font-size:18px}
 <svg class="i-on" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V5.5l9-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="15.5" cy="15" r="2.5"/></svg>
 <svg class="i-off" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17.5V5.5l9-2v11.5"/><circle cx="6.5" cy="17.5" r="2.5"/><circle cx="15.5" cy="15" r="2.5"/><line x1="4.5" y1="4.5" x2="19.5" y2="19.5"/></svg>
 </button>
-<div class="foot">评估结果仅供参考，不作为医疗或安全承诺。标准数值以现行规范为准，预算区间为行业经验值。</div>
+<div class="foot">体检结果仅供参考，不作为医疗或安全承诺。标准数值以现行规范为准，预算区间为行业经验值。</div>
 <script>
 const MODULES = [
     {
@@ -1298,7 +1298,7 @@ function viewIntro(){
    + '<h1>爸妈的房子，哪些地方该动一动</h1>'
    + '<p class="sub">9 个问题，凭印象答就行，三分钟出分，最后给你三项最该动的地方，配大概怎么改、花多少钱。</p>'
    + '<p class="sub">答完不排名不打分，就是把家里角角落落过一遍，不确定的可以跳过。</p>'
-   + '<button class="btn" onclick="go(\'info\')">开始快评</button></div>';
+   + '<button class="btn" onclick="go(\'info\')">开始安全初检</button></div>';
 }
 function viewInfo(){
   prog('基本信息');
@@ -1336,13 +1336,13 @@ function viewQuiz(){
 }
 function pick(id, idx){ S.answers[id] = idx; save(); nextQ(); }
 function viewResult(){
-  prog('快评结果');
+  prog('安全初检结果');
   const p = quickScore(), g = grade(p), top = quickTop3();
-  let html = '<div class="card"><p class="sub">居家安全快评</p>'
+  let html = '<div class="card"><p class="sub">居家适老化安全初检</p>'
    + '<div class="score ' + g[2] + '">' + p + '<span style="font-size:18px"> 分</span></div>'
    + '<p><span class="tag">' + g[0] + ' 级</span> ' + g[1] + '</p>';
   if(top.length === 0){
-    html += '<p class="sub">九项都没看出明显问题，继续保持。想再细一点可以看完整版。</p>';
+    html += '<p class="sub">九项都没看出明显问题，继续保持。想再细一点可以做一次完整体检。</p>';
   } else {
     html += '<h2 style="margin-top:18px">最该动的 ' + top.length + ' 处</h2>';
     top.forEach((t,i) => {
@@ -1353,19 +1353,19 @@ function viewResult(){
        + '<p class="mini">大致花费：' + esc(q.budget) + ' 元（行业经验值，按实际面积与做法浮动）</p></div>';
     });
   }
-  html += '<div class="hint">想拿到 12 个模块 51 题的完整报告，留个联系方式，我把完整版入口发给你。</div>'
-   + '<button class="btn" onclick="go(\'lead\')">看看完整报告</button>'
+  html += '<div class="hint">想拿到 12 个模块 51 题的完整体检报告，留个联系方式，我把入口发给你。</div>'
+   + '<button class="btn" onclick="go(\'lead\')">看看完整体检报告</button>'
    + '<button class="btn ghost" style="margin-top:10px" onclick="restart()">重新做一遍</button></div>';
   app().innerHTML = html;
 }
 function restart(){ if(confirm('清空已答内容，重新开始？')){ localStorage.removeItem(KEY); S = load(); go('intro'); } }
 function viewLead(){
   prog('留联系方式');
-  app().innerHTML = '<div class="card"><h2>完整报告里有什么</h2>'
-   + '<p class="sub">12 个模块 51 道题，一项项过。每处风险写清现在的情况、怎么改、大致花费区间，还有材料选购要点。</p>'
-   + '<div class="field"><label>微信号或手机号（必填）</label><input id="f-contact" placeholder="方便我把完整版入口发给你"></div>'
+  app().innerHTML = '<div class="card"><h2>完整体检报告里有什么</h2>'
+   + '<p class="sub">比初检多 42 题，一共 51 道，一项项过。每处风险写清现在的情况、怎么改、大致花费区间，还有材料选购要点。</p>'
+   + '<div class="field"><label>微信号或手机号（必填）</label><input id="f-contact" placeholder="方便我把完整体检报告入口发给你"></div>'
    + '<div class="field"><label>怎么称呼（选填）</label><input id="f-leadname" value="' + esc((S.info||{}).name||'') + '"></div>'
-   + '<button class="btn" onclick="submitLead()">提交，领取完整版入口</button>'
+   + '<button class="btn" onclick="submitLead()">提交，领取完整体检报告入口</button>'
    + '<p class="mini">只用来发这份评估相关的内容，不会转给其他人。</p></div>';
 }
 function submitLead(){
@@ -1382,15 +1382,15 @@ function submitLead(){
   go('unlock');
 }
 function viewUnlock(){
-  prog('完整版入口');
+  prog('完整体检报告入口');
   const logs = JSON.parse(localStorage.getItem('yg_aging_leads') || '[]');
-  let html = '<div class="card"><h2>完整版入口</h2>'
+  let html = '<div class="card"><h2>完整体检报告入口</h2>'
    + '<p class="sub">已经收到你的联系方式。兑换码在面包多下单后自动发到订单消息里，手上已经有码的话直接输在下面。</p>';
   if(S.unlocked){
-    html += '<p class="ok">已解锁完整版。</p><button class="btn" onclick="startFull()">开始完整评估</button>';
+    html += '<p class="ok">已解锁完整体检报告。</p><button class="btn" onclick="startFull()">开始完整体检</button>';
   } else {
     html += '<div class="field"><label>兑换码</label><input id="f-code" placeholder="例如 YG-XXXX-XX"></div>'
-     + '<button class="btn" onclick="tryCode()">解锁完整版</button>'
+     + '<button class="btn" onclick="tryCode()">解锁完整体检报告</button>'
      + (CONFIG.mbdUrl ? '<a class="btn ghost" style="margin-top:10px" href="' + CONFIG.mbdUrl + '">还没有码，去下单</a>' : '');
   }
   html += '<button class="btn ghost" style="margin-top:10px" onclick="copyLead()">复制我的评估信息，回私信发我</button>' + '<p class="mini">本机提交记录：' + logs.length + ' 条（仅存本机，用于对账）。</p>'
@@ -1411,15 +1411,15 @@ function startFull(){
 }
 function viewFull(){
   const done = Object.keys(S.answers).length;
-  prog('完整版 ' + done + ' / ' + ALL.length);
-  app().innerHTML = '<div class="card"><h2>开始完整评估</h2>'
+  prog('完整体检 ' + done + ' / ' + ALL.length);
+  app().innerHTML = '<div class="card"><h2>开始完整体检</h2>'
    + '<p class="sub">还剩 ' + (ALL.length-done) + ' 题，一组一组过，选答题可以先跳过。</p>'
    + '<button class="btn" onclick="startFull()">继续答题</button></div>';
 }
 function viewReport(){
-  prog('完整报告');
+  prog('完整体检报告');
   const r = fullScore(), g = grade(r.score);
-  let html = '<div class="card"><p class="sub">完整评估报告</p>'
+  let html = '<div class="card"><p class="sub">居家适老化完整体检报告</p>'
    + '<div class="score ' + g[2] + '">' + r.score + '<span style="font-size:18px"> 分</span></div>'
    + '<p><span class="tag">' + g[0] + ' 级</span> ' + g[1] + '</p>';
   const weak = r.rows.filter(x => x.done && x.pct < 0.7).sort((a,b) => a.pct - b.pct).slice(0,3);
@@ -1490,13 +1490,13 @@ bgmInit();
   const last = logs[logs.length-1] || {};
   const top = quickTop3().map(function(t){ return t.mod; }).join("、");
   const p = quickScore();
-  const txt = "适老化快评：" + (last.name||"") + " " + (last.city||"") + " " + (last.age||"") + " " + (last.live||"") + "。得分 " + p + " 分，" + grade(p)[0] + " 级。最该动的：" + (top || "无明显短板") + "。我的联系方式：" + (last.contact||"");
+  const txt = "居家适老化体检 · 安全初检：" + (last.name||"") + " " + (last.city||"") + " " + (last.age||"") + " " + (last.live||"") + "。得分 " + p + " 分，" + grade(p)[0] + " 级。最该动的：" + (top || "无明显短板") + "。我的联系方式：" + (last.contact||"");
   if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(function(){ alert("已复制，回私信粘贴发我就行"); }, function(){ alert(txt); }); }
   else { alert(txt); }
 }
 function copyReport(){
   const r = fullScore();
-  const txt = '居家适老化安全评估：' + r.score + ' 分（' + grade(r.score)[0] + ' 级）。短板模块：'
+  const txt = '居家适老化体检：' + r.score + ' 分（' + grade(r.score)[0] + ' 级）。短板模块：'
     + r.rows.filter(x => x.done && x.pct < 0.7).map(x => x.name).join('、');
   if(navigator.share){ navigator.share({ text:txt }).catch(function(){}); }
   else if(navigator.clipboard){ navigator.clipboard.writeText(txt).then(function(){ alert('已复制'); }); }
